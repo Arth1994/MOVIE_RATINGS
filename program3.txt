@@ -1,0 +1,23 @@
+//Start
+import org.apache.spark.sql.SparkSession
+val sparkSession = SparkSession.builder().getOrCreate()
+val m = sparkSession.read.format("com.databricks.spark.csv").option("header", "true").option("inferSchema", "true").load("/FileStore/tables/movies.csv")
+val r = sparkSession.read.format("com.databricks.spark.csv").option("header", "true").option("inferSchema", "true").load("/FileStore/tables/ratings.csv")
+val t = sparkSession.read.format("com.databricks.spark.csv").option("header", "true").option("inferSchema", "true").load("/FileStore/tables/tags.csv")
+val avg = r.groupBy("movieId").avg("rating")
+val r1 = avg.sort($"movieId")
+r1.show()
+val bottom10 = avg.sort($"avg(rating)").limit(10).join(m,"movieId")
+val r2 = bottom10.select($"title", $"avg(rating)")
+r2.show()
+val aM = t.filter(t("tag") === "action")
+val aMavg = avg.join(aM,"movieId")
+val sortedAmAvg = aMavg.sort($"movieId")
+val r3 = sortedAmAvg.select($"movieId", $"avg(rating)", $"tag")
+r3.show()
+val thM = m.filter(m("genres") contains "Thrill")
+val thAvg = sortedAmAvg.join(thM, "movieId")
+val sortedThAvg = thAvg.sort($"movieId")
+val r4 = sortedThAvg.select($"movieId", $"avg(rating)", $"genres")
+r4.show()
+//End
