@@ -1,4 +1,5 @@
 //Start
+//Program for Calculating Movie Ratings Using Spark SQL
 import org.apache.spark.sql.SparkSession
 val sparkSession = SparkSession.builder().getOrCreate()
 val m = sparkSession.read.format("com.databricks.spark.csv").option("header", "true").option("inferSchema", "true").load("/FileStore/tables/movies.csv")
